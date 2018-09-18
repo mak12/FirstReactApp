@@ -4,27 +4,26 @@ import {
   StyleSheet,
   Text,
   View,
-  Image
+  Image,
+  AsyncStorage
 } from 'react-native';
 
 import { createBottomTabNavigator, createStackNavigator } from 'react-navigation';
 
-import ToDoList from './src/components/TodoList'
-import About from './src/components/About'
-import AddTodo from './src/components/AddTodo'
+import ToDoList from './src/screens/TodoList/TodoList'
+import About from './src/screens/About/About'
+import AddTodo from './src/screens/AddTodo/AddTodo'
+import Login from './src/screens/Login/Login'
 import CheckImage from './src/images/check.png'
 
 const TodoNav = createStackNavigator({
-    TodoList: { screen: ToDoList },
-    AddTodo: { screen: AddTodo }
-}, {
-  mode: 'modal'   
+    TodoList: { screen: ToDoList }
 })
 
 
 TodoNav.navigationOptions = {
       title: 'List',
-      header: null,
+        
      tabBarIcon: ({ tintColor }) => (
       <Image 
         source={ CheckImage} 
@@ -36,10 +35,9 @@ TodoNav.navigationOptions = {
 
 
 const TabNav = createBottomTabNavigator({
-    LOL: { screen: TodoNav },
-    AboutNav: { screen: About }
+    TodoNav : { screen: TodoNav },
+    About: { screen: About }
 }, {
-   
     tabBarOptions: {
         activeTintColor: '#0066cc',
         showLabel: true,
@@ -48,17 +46,46 @@ const TabNav = createBottomTabNavigator({
 //            fontSize: 13
 //  }
     }
-    
-    
 })
 
+const RootNav = createStackNavigator({
+    TabNav: { screen: TabNav,navigationOptions: () => ({
+                header: null
+    }) },
+    AddTodo: { screen: AddTodo }
+},{
+    mode: 'modal'
+})
+
+
+
 export default class App extends Component<> {
-  render() {
-    return (
-//      <ToDoList />
-        //using tab nav now
-        <TabNav />
-    );
+    state={
+    userName: null
+}
+
+    login = (userName) =>{
+        this.setState({ userName })
+    }
+    
+    logout = () =>{
+        AsyncStorage.setItem(
+            '@TodoList:userName',''
+        ).then(() => 
+              this.setState({ userName: null })
+              )
+    }
+    
+    render() {
+        //Checking if user is null goto Login page else show home page
+        if (this.state.userName != null){
+            return <RootNav screenProps={{ logout: this.logout }} />
+        }
+        else{
+            return <Login login= { this.login }/>
+        }
+        
+   
   }
 }
 

@@ -6,39 +6,36 @@ import { StyleSheet,
         StatusBar,
         ActivityIndicator,
         Image,
-        Platform
+        Platform,
+        TouchableOpacity
        } from 'react-native';
 
-import { Button, Text as NBText, Segment } from 'native-base'
+import { Button, Text as NBText, 
+        Segment,
+        Icon
+       } from 'native-base'
 
 import TodoItems from './TodoItem'
 
-import CheckImage from '../images/check.png'
+import CheckImage from 'images/check.png'
 
-import { items } from '../lib/api.js'
+import { items } from 'lib/api.js'
+
+import TodoHeader from './TodoHeader'
+
+import fadeout from 'components/shared/FadeOut'
+const FadeableTodoItem = fadeout(TodoItems)
 
 export default class TodoList extends Component{
     
     static navigationOptions = {
-
-            header: null
+           header: null
          }
-
 
     state = {
         items: null,
         filter: 'All'
     }
-
-//   componentDidMount(){
-//        setTimeout(() => {
-//            const taskFromNetwork = ["First", "Second", "Third"]                
-//            this.setState({
-//                items: taskFromNetwork
-//            })
-//        }, 2000)
-//    }  // just a delay method
-
 
 componentDidMount(){
             items('GET')
@@ -86,7 +83,22 @@ componentDidMount(){
   });
     }
     
-    deleteTodo = (id) =>{
+    deleteTodo= (id) => {
+        const newItems = this.state.items.map( item => {
+            if(item.id === id){
+                return{
+                    ...item,
+                    deleted: true
+                }
+            }
+            else{
+                return item
+            }
+        })
+        this.setState({ items: newItems })
+    }
+    
+    deleteTodoApi = (id) =>{
             items('DELETE', { id })
             .then( json => {
                 this.setState({ items: json })
@@ -122,11 +134,7 @@ componentDidMount(){
         return(
             <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-                <View style= {styles.header}>
-                    <Text style={styles.headerItem}>
-                        Todo List
-                    </Text>
-                </View>
+                <TodoHeader logout= { this.props.screenProps.logout } />
              <View style= {styles.contentWrapper}>
             
                 <View style= {styles.contentHeader}>
@@ -162,10 +170,15 @@ componentDidMount(){
                     data = {this.filterdItems()}
                     style = {styles.content}
                     renderItem = {(row) => {
-                        return <TodoItems 
-                            item = {row.item}
-                            updateTodo = {this.updateTodo}
-                            deleteTodo = {this.deleteTodo}
+                        return <FadeableTodoItem 
+                            item= {row.item}
+                            updateTodo= {this.updateTodo}
+                            deleteTodo= {this.deleteTodo}
+                            deleteTodoApi= {this.deleteTodoApi}
+                            fade= {row.item.deleted}
+                            afterFade= {() => {
+                                        this.deleteTodoApi(row.item.id)
+                                       }}
                         />
                 }}
                 keyExtractor = {item => item.id.toString()}
@@ -190,24 +203,10 @@ componentDidMount(){
     }
 }
 
-const styles = StyleSheet.create({
-    
- container: {
+const styles = StyleSheet.create({   
+    container: {
     flex: 1,
     backgroundColor: '#fff'
-  },
-  header: {
-    padding : 10,
-    paddingTop: 20,
-    alignSelf: 'stretch',
-    backgroundColor:'#2288ee',
-    borderBottomWidth: 1,
-    borderColor: '#0066cc'
-  },
-    headerItem :{
-    textAlign: 'center',
-    fontSize: 20,
-    color: '#ffffff'
   },
     content: {
         flex : 1,

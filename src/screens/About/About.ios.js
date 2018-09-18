@@ -6,7 +6,7 @@ import {
   Image
 } from 'react-native';
 
-import AboutImage from '../images/star.png'
+import AboutImage from 'images/star.png'
 
 export default class About extends Component {
 
@@ -36,7 +36,7 @@ export default class About extends Component {
         textAlign: 'center' , 
         padding: 20
             }}>
-        This screen was made for Android
+        This screen was made for iOS
         </Text>
       </View>
     )

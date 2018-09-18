@@ -8,13 +8,18 @@ import {
 } from 'react-native';
 
 import { Form, Item, Input, Button, Text as NBText } from 'native-base'
+import CheckImage from 'images/check.png'
 
 export default class AddTodo extends Component {
 
-    state = {
-    text: ''
-  }
+     state = {
+        task: ''
+     }
 
+     static navigationOptions= {
+            title: 'Add Todo'
+        }
+    
     onAdd = () => {
         console.log("new task:", this.state.task)
         const nav = this.props.navigation
